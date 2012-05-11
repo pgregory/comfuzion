@@ -1,16 +1,12 @@
-require "Component"
-require "ObjectManager"
+local cf = require "comfuzion.comfuzion"
 
-class "Job" : extends(Component) {
-   salary = 0;
-}
-
-function Job:__init()
-   self.super.__init(self, "Job")
-   self.salary = 0
+local Job = class("Job", cf.Component)
+function Job:initialize()
+  Job.super.initialize(self, "Job")
+  self.salary = 0
 end
 
-function Job:addedToObject()
+function Job:addedToEntity()
    self:requestMessage("Fire", function(msg) self:fire(msg) end)
 end
 
@@ -19,18 +15,14 @@ function Job:fire(msg)
 end
 
 
-class "Person" : extends(Component) {
-   age = 0;
-   pname = "";
-}
-
-function Person:__init(name, age)
-   self.super.__init(self, "Person")
+local Person = class("Person", cf.Component)
+function Person:initialize(name, age)
+   Person.super.initialize(self, "Person")
    self.age = age
    self.pname = name
 end
 
-function Person:addedToObject()
+function Person:addedToEntity()
    print(self.pname.." with age "..self.age.." was added to the system")
    self:requestComponent("Job", function(msg) self:processJob(msg) end, true)
    self:requestMessage("NextYear", function(msg) self:nextYear(msg) end)
@@ -54,14 +46,12 @@ function Person:nextYear(msg)
 end
 
 
-class "Company" : extends(Component) {
-}
-
-function Company:__init()
-  self.super.__init(self, "Company")
+local Company = class("Company", cf.Component)
+function Company:initialize()
+  Company.super.initialize(self, "Company")
 end
 
-function Company:addedToObject()
+function Company:addedToEntity()
   self:requestComponent("Person", function(msg) self:processPerson(msg) end)
   self:requestMessage("Birthday", function(msg) self:processBirthday(msg) end)
 end
@@ -87,7 +77,7 @@ end
 function Company:processBirthday(msg)
   local person = msg.sender
   if person.age == 65 then
-    self:sendMessageToObject(person.ownerId, "Fire")
+    self:sendMessageToEntity(person.ownerId, "Fire")
   end
 
   if person.age == 50 then
@@ -98,12 +88,10 @@ function Company:processBirthday(msg)
 end
 
 
-class "Government" : extends(Component) {
-  totalEarnedIncome = 0;
-}
-
-function Government:__init()
-  self.super.__init(self, "Government")
+local Government = class("Government", cf.Component)
+function Government:initialize()
+  Government.super.initialize(self, "Government")
+  self.totalEarnedIncome = 0
 end
 
 function Government:advanceCalendar()
@@ -112,7 +100,7 @@ function Government:advanceCalendar()
   print("Government annouces total earned salary at this year: "..self.totalEarnedIncome)
 end
 
-function Government:addedToObject()
+function Government:addedToEntity()
   self:requestComponent("Job", function(msg) self:processJob(msg) end)
 end
 
@@ -130,25 +118,25 @@ end
 
 
 
-om = ObjectManager:new()
+om = cf.EntityManager:new()
 
-p1Id = om:createObject()
+p1Id = om:createEntity()
 p1 = Person:new("Walter", 43)
 om:addComponent(p1Id, p1)
 
-companyId = om:createObject()
+companyId = om:createEntity()
 company = Company:new()
 om:addComponent(companyId, company)
 
-p2Id = om:createObject()
+p2Id = om:createEntity()
 p2 = Person:new("Bob", 62)
 om:addComponent(p2Id, p2)
 
-p3Id = om:createObject()
+p3Id = om:createEntity()
 p3 = Person:new("Peter", 48)
 om:addComponent(p3Id, p3)
 
-governmentId = om:createObject()
+governmentId = om:createEntity()
 government = Government:new()
 om:addComponent(governmentId, government)
 

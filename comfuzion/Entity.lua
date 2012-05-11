@@ -1,38 +1,32 @@
-require "class"
+require "comfuzion.middleclass.middleclass"
 
-class "Object" {
-   id = 0;
-   localRequests = {};
-   components = {};
-   finalized = false;
-}
-
-function Object:__init(id)
+local Entity = class("Entity")
+function Entity:initialize(id)
    self.id = id
    self.finalized = false
    self.localRequests = {}
    self.components = {}
 end
 
-function Object:addComponent(component)
+function Entity:addComponent(component)
   if not component:isValid() then
     return false
   end
 
-  if not self.components[component.name] then
-    self.components[component.name] = {}
+  if not self.components[component.cname] then
+    self.components[component.cname] = {}
   end
 
-  table.insert(self.components[component.name], component)
+  table.insert(self.components[component.cname], component)
   return true
 end
 
-function Object:getComponents(name)
-  if name then
-    if not self.components[name] then
+function Entity:getComponents(cname)
+  if cname then
+    if not self.components[cname] then
       return {}
     else
-      return self.components[name]
+      return self.components[cname]
     end
   else
     local comps = {}
@@ -45,7 +39,7 @@ function Object:getComponents(name)
   end
 end
 
-function Object:removeComponent(component)
+function Entity:removeComponent(component)
    for n,v in pairs(self.components) do
       for i,c in ipairs(v) do
          if c == component then
@@ -63,7 +57,7 @@ function Object:removeComponent(component)
    end
 end
 
-function Object:sendMessageObjectByRequestId(requestId, msgObject)
+function Entity:sendMessageObjectByRequestId(requestId, msgObject)
   if not self.localRequests[requestId] then return end
 
   local reqs = self.localRequests[requestId]
@@ -72,9 +66,9 @@ function Object:sendMessageObjectByRequestId(requestId, msgObject)
       if r.trackMe then
          local name = ""
          if msgObject.mtype == 'MESSAGE' then
-            name = r.component.objectManager:getRequestById('MESSAGE', requestId)
+            name = r.component.entityManager:getRequestById('MESSAGE', requestId)
          else
-            name = r.component.objectManager:getRequestById('COMPONENT', requestId)
+            name = r.component.entityManager:getRequestById('COMPONENT', requestId)
          end
          print(""..requestId.." - "..name)
       end
@@ -83,14 +77,14 @@ function Object:sendMessageObjectByRequestId(requestId, msgObject)
   end
 end
 
-function Object:registerRequest(requestId, registeredComponent)
+function Entity:registerRequest(requestId, registeredComponent)
    if not self.localRequests[requestId] then
       self.localRequests[requestId] = {}
    end
    table.insert(self.localRequests[requestId], registeredComponent)
 end
 
-function Object:trackRequest(requestId, component)
+function Entity:trackRequest(requestId, component)
    if #self.localRequests <= requestId then return end
 
    local reqs = self.localRequests[requestId]
@@ -101,4 +95,4 @@ function Object:trackRequest(requestId, component)
    end
 end
 
-
+return Entity

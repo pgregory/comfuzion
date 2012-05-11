@@ -1,0 +1,3 @@
+[submodule "comfuzion/middleclass"]
+	path = comfuzion/middleclass
+	url = https://github.com/kikito/middleclass.git
